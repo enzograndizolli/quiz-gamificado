@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionário Gamificado Premium</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  background:#0a1f44;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.phone{
+  width:360px;
+  height:640px;
+  background:#000;
+  border-radius:30px;
+  padding:10px;
+  box-shadow:0 0 30px rgba(0,0,0,0.6);
+}
+
+.container{
+  background:white;
+  height:100%;
+  border-radius:25px;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.logo{
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  color:#1e3a8a;
+}
+
+.banner{
+  background:#e0e7ff;
+  padding:12px;
+  border-radius:12px;
+  font-size:13px;
+  text-align:center;
+  margin-top:8px;
+  margin-bottom:15px;
+}
+
+.card{
+  background:#f5f7ff;
+  padding:10px;
+  border-radius:10px;
+  margin:8px 0;
+  font-size:13px;
+}
+
+.opcao{
+  background:#f0f4ff;
+  margin:8px 0;
+  padding:12px;
+  border-radius:12px;
+  cursor:pointer;
+}
+.opcao.selecionado{background:#1e3a8a;color:white}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#1e3a8a;
+  color:white;
+  margin-top:10px;
+}
+
+.progress{height:8px;background:#ddd;border-radius:10px;margin:10px 0}
+.progress-bar{
+  height:100%;
+  width:0;
+  background:#1e3a8a;
+  transition:0.3s;
+}
+
+.footer{
+  font-size:12px;
+  color:#555;
+  text-align:center;
+}
+
+.fade{animation:fade 0.3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+.info-icons{
+  display:flex;
+  justify-content:space-around;
+  font-size:20px;
+  opacity:0.6;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+<div class="container">
+
+<div>
+<div class="logo">🎮 Produtividade Game</div>
+<div class="banner">Transforme sua rotina em um jogo 🎯</div>
+<div class="card">🔥 Complete tarefas e evolua seus hábitos</div>
+</div>
+
+<!-- MENU -->
+<div id="menu">
+<div class="card">💡 Dica: pequenas ações diárias geram grandes resultados</div>
+<div class="card">📊 Acompanhe seus hábitos</div>
+<div class="card">🏆 Evolua sua disciplina</div>
+<div class="card">🚀 Alcance seus objetivos</div>
+<button onclick="irLogin()">▶️ Começar</button>
+<button onclick="verSobre()">ℹ️ Sobre</button>
+</div>
+
+<!-- SOBRE -->
+<div id="sobre" style="display:none">
+<div class="card">Este app usa gamificação para entender e melhorar hábitos.</div>
+<button onclick="voltarMenu()">⬅️ Voltar</button>
+</div>
+
+<!-- LOGIN -->
+<div id="login" style="display:none">
+<div class="card">👤 Crie sua identidade no app e acompanhe seu progresso</div>
+<div class="card">Digite seu nome para iniciar</div>
+<input id="nome" placeholder="Seu nome">
+<button onclick="entrar()">Entrar</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" style="display:none">
+<h3 id="titulo"></h3>
+<div class="progress">
+  <div class="progress-bar" id="bar"></div>
+</div>
+<div id="porcentagem" style="font-size:12px;text-align:center;margin-top:5px;color:#333">0% concluído</div>
+<div id="conteudo" class="fade">
+<div id="pergunta"></div>
+<div id="opcoes"></div>
+</div>
+<button onclick="proxima()">Próxima</button>
+<div class="footer">Pressione ENTER para continuar ⌨️</div>
+</div>
+
+<!-- FINAL -->
+<div id="final" style="display:none">
+<div class="card">🎉 Parabéns por concluir o questionário!</div>
+<div class="card">📊 Suas respostas foram analisadas abaixo</div>
+<div class="card">📊 Veja abaixo um resumo das suas respostas</div>
+<h3>Resultado</h3>
+<canvas id="grafico"></canvas>
+<button onclick="reiniciar()">🔄 Reiniciar</button>
+</div>
+
+<div class="info-icons">🎮 📊 🎯 🧠 🚀</div>
+
+</div>
+</div>
+
+<script>
+let usuario="";
+
+function irLogin(){menu.style.display='none';login.style.display='block'}
+function voltarMenu(){sobre.style.display='none';menu.style.display='block'}
+function verSobre(){menu.style.display='none';sobre.style.display='block'}
+
+function entrar(){
+ usuario=nome.value;
+ if(!usuario){alert('Digite nome');return}
+ login.style.display='none';
+ quiz.style.display='block';
+ titulo.innerText="Olá, "+usuario;
+ carregar();
+}
+
+window.addEventListener('keydown',function(e){
+ if(e.key==='Enter'){
+  if(login.style.display==='block') entrar();
+  else if(quiz.style.display==='block') proxima();
+ }
+});
+
+const perguntas=[
+{q:"Você tem dificuldade em manter rotina?",o:["Sim","Às vezes","Não"]},
+{q:"Você usa apps de produtividade?",o:["Sim","Às vezes","Nunca"]},
+{q:"Você gosta de jogos?",o:["Muito","Um pouco","Não"]},
+{q:"O que te motiva?",o:["Recompensa","Competição","Desafio"]},
+{q:"Gostaria de ganhar pontos?",o:["Sim","Talvez","Não"]},
+{q:"Subir nível motiva?",o:["Sim","Pouco","Não"]},
+{q:"Gosta de desafios?",o:["Sim","Às vezes","Não"]},
+{q:"Competir é interessante?",o:["Sim","Depende","Não"]},
+{q:"Ranking motiva?",o:["Sim","Talvez","Não"]},
+{q:"Conquistas interessam?",o:["Muito","Pouco","Nada"]},
+{q:"Quer melhorar produtividade?",o:["Sim","Já sou","Não"]},
+{q:"Usa celular todo dia?",o:["Muito","Normal","Pouco"]},
+{q:"Gostaria de app tipo jogo?",o:["Sim","Talvez","Não"]},
+{q:"Recompensas visuais ajudam?",o:["Sim","Pouco","Não"]},
+{q:"Usaria o app?",o:["Sim","Talvez","Não"]}
+];
+
+let atual=0,respostas=[];
+
+function carregar(){
+ let progresso = Math.round((atual/perguntas.length)*100);
+ document.getElementById("porcentagem").innerText = progresso + "% concluído";
+
+ // mudança de cor dinâmica
+ let cor;
+ if(progresso < 30) cor = "#1e3a8a";
+ else if(progresso < 70) cor = "#2563eb";
+ else cor = "#22c55e";
+ document.getElementById("bar").style.background = cor;
+ let p=perguntas[atual];
+ conteudo.classList.remove('fade');
+ void conteudo.offsetWidth;
+ conteudo.classList.add('fade');
+ pergunta.innerText=`${atual+1}/15 - ${p.q}`;
+ opcoes.innerHTML=p.o.map((op,i)=>`<div class='opcao' onclick='sel(${i})'>${op}</div>`).join('');
+ bar.style.width=(atual/perguntas.length*100)+'%';
+}
+
+function sel(i){
+ respostas[atual]=i;
+ document.querySelectorAll('.opcao').forEach(e=>e.classList.remove('selecionado'));
+ document.querySelectorAll('.opcao')[i].classList.add('selecionado');
+}
+
+function proxima(){
+ if(respostas[atual]==undefined){alert('Escolha!');return}
+ atual++;
+ atual<perguntas.length?carregar():finalizar();
+}
+
+function finalizar(){
+ quiz.style.display='none';
+ final.style.display='block';
+
+ // CONTAGEM
+ let cont=[0,0,0];
+ respostas.forEach(r=>cont[r]++);
+
+ new Chart(grafico,{
+  type:'bar',
+  data:{
+    labels:['Sim','Intermediário','Não'],
+    datasets:[{
+      label:'Respostas',
+      data:cont,
+      backgroundColor:['#1e3a8a','#3b82f6','#22c55e'],
+      borderRadius:8
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{beginAtZero:true,ticks:{stepSize:1}}
+    }
+  }
+});
+
+ // ✨ EFEITO GLOW (clean e moderno)
+let glow=document.createElement('div');
+glow.style.position='fixed';
+glow.style.top='0';
+glow.style.left='0';
+glow.style.width='100%';
+glow.style.height='100%';
+glow.style.background='radial-gradient(circle, rgba(34,197,94,0.25) 0%, rgba(0,0,0,0) 70%)';
+glow.style.opacity='0';
+glow.style.transition='opacity 1s ease';
+glow.style.zIndex='9998';
+document.body.appendChild(glow);
+setTimeout(()=>{glow.style.opacity='1';},50);
+setTimeout(()=>{glow.style.opacity='0';},1500);
+setTimeout(()=>{glow.remove();},2500);
+
+ // 🔥 PERFIL E MENSAGEM
+ let perfilTitulo="";
+let perfilDesc="";
+
+if(cont[0] > cont[1] && cont[0] > cont[2]){
+  perfilTitulo="🎯 Você tem um perfil motivado";
+  perfilDesc="Você demonstra interesse em evoluir e busca formas de melhorar sua rotina. Um sistema gamificado pode te ajudar a manter consistência e alcançar seus objetivos.";
+} else if(cont[1] > cont[0] && cont[1] > cont[2]){
+  perfilTitulo="⚖️ Você tem um perfil equilibrado";
+  perfilDesc="Você já possui certa organização, mas ainda pode se beneficiar de estímulos como desafios e recompensas para manter a constância.";
+} else {
+  perfilTitulo="🌱 Você está em fase de construção";
+  perfilDesc="Você pode desenvolver hábitos com mais apoio e motivação. Um aplicativo gamificado pode tornar esse processo mais leve e interessante.";
+}
+
+let box=document.createElement('div');
+box.style.marginTop='15px';
+box.style.padding='12px';
+box.style.borderRadius='10px';
+box.style.background='#eef2ff';
+
+let titulo=document.createElement('div');
+titulo.innerText=perfilTitulo;
+titulo.style.fontWeight='bold';
+titulo.style.marginBottom='5px';
+
+let desc=document.createElement('div');
+desc.innerText=perfilDesc;
+desc.style.fontSize='13px';
+
+document.getElementById('final').appendChild(box);
+box.appendChild(titulo);
+box.appendChild(desc);
+};
+
+
+function reiniciar(){location.reload()}
+</script>
+
+</body>
+</html>
