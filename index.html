@@ -2,38 +2,50 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Questionário Gamificado Premium</title>
+<title>Focus</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
-  font-family: Arial;
   margin:0;
-  background:#0a1f44;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  font-family:Arial;
+  background: linear-gradient(270deg, #0f172a, #1e3a8a, #020617);
+  background-size:600% 600%;
+  animation:fundo 10s ease infinite;
+}
+
+@keyframes fundo{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+#glow{
+  position:fixed;
+  width:150px;
+  height:150px;
+  background: radial-gradient(circle, rgba(59,130,246,0.2), transparent 70%);
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
 }
 
 .phone{
   width:360px;
-  height:640px;
-  background:#000;
-  border-radius:30px;
-  padding:10px;
+  margin:auto;
+  margin-top:30px;
+  background:#111;
+  border-radius:25px;
+  padding:15px;
   box-shadow:0 0 30px rgba(0,0,0,0.6);
 }
 
 .container{
   background:white;
-  height:100%;
-  border-radius:25px;
+  border-radius:20px;
   padding:15px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
 }
 
 .logo{
@@ -43,32 +55,35 @@ body{
   color:#1e3a8a;
 }
 
-.banner{
-  background:#e0e7ff;
-  padding:12px;
-  border-radius:12px;
-  font-size:13px;
-  text-align:center;
-  margin-top:8px;
-  margin-bottom:15px;
+.pergunta-box{
+  transition:0.4s;
 }
 
-.card{
-  background:#f5f7ff;
-  padding:10px;
-  border-radius:10px;
-  margin:8px 0;
-  font-size:13px;
+.animar{
+  animation:entrar 0.4s;
+}
+
+@keyframes entrar{
+  from{opacity:0;transform:translateX(40px)}
+  to{opacity:1;transform:translateX(0)}
 }
 
 .opcao{
-  background:#f0f4ff;
-  margin:8px 0;
+  background:#eef2ff;
   padding:12px;
+  margin:8px 0;
   border-radius:12px;
   cursor:pointer;
 }
-.opcao.selecionado{background:#1e3a8a;color:white}
+
+.opcao:hover{
+  transform:scale(1.02);
+}
+
+.selecionado{
+  background:#1e3a8a;
+  color:white;
+}
 
 button{
   width:100%;
@@ -78,252 +93,161 @@ button{
   background:#1e3a8a;
   color:white;
   margin-top:10px;
+  cursor:pointer;
 }
 
-.progress{height:8px;background:#ddd;border-radius:10px;margin:10px 0}
-.progress-bar{
+.progress{
+  height:6px;
+  background:#ddd;
+  border-radius:10px;
+  margin:10px 0;
+}
+
+.bar{
   height:100%;
   width:0;
   background:#1e3a8a;
-  transition:0.3s;
+  border-radius:10px;
 }
 
-.footer{
-  font-size:12px;
-  color:#555;
-  text-align:center;
-}
-
-.fade{animation:fade 0.3s}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-
-.info-icons{
-  display:flex;
-  justify-content:space-around;
-  font-size:20px;
-  opacity:0.6;
-}
 </style>
 </head>
+
 <body>
+
+<div id="glow"></div>
 
 <div class="phone">
 <div class="container">
 
-<div>
-<div class="logo">🎮 Produtividade Game</div>
-<div class="banner">Transforme sua rotina em um jogo 🎯</div>
-<div class="card">🔥 Complete tarefas e evolua seus hábitos</div>
+<div class="logo">🚀 Focus</div>
+
+<div id="inicio">
+  <p>Transforme sua rotina em progresso real ⚡</p>
+  <button onclick="iniciar()">Começar</button>
 </div>
 
-<!-- MENU -->
-<div id="menu">
-<div class="card">💡 Dica: pequenas ações diárias geram grandes resultados</div>
-<div class="card">📊 Acompanhe seus hábitos</div>
-<div class="card">🏆 Evolua sua disciplina</div>
-<div class="card">🚀 Alcance seus objetivos</div>
-<button onclick="irLogin()">▶️ Começar</button>
-<button onclick="verSobre()">ℹ️ Sobre</button>
-</div>
-
-<!-- SOBRE -->
-<div id="sobre" style="display:none">
-<div class="card">Este app usa gamificação para entender e melhorar hábitos.</div>
-<button onclick="voltarMenu()">⬅️ Voltar</button>
-</div>
-
-<!-- LOGIN -->
-<div id="login" style="display:none">
-<div class="card">👤 Crie sua identidade no app e acompanhe seu progresso</div>
-<div class="card">Digite seu nome para iniciar</div>
-<input id="nome" placeholder="Seu nome">
-<button onclick="entrar()">Entrar</button>
-</div>
-
-<!-- QUIZ -->
 <div id="quiz" style="display:none">
-<h3 id="titulo"></h3>
-<div class="progress">
-  <div class="progress-bar" id="bar"></div>
-</div>
-<div id="porcentagem" style="font-size:12px;text-align:center;margin-top:5px;color:#333">0% concluído</div>
-<div id="conteudo" class="fade">
-<div id="pergunta"></div>
-<div id="opcoes"></div>
-</div>
-<button onclick="proxima()">Próxima</button>
-<div class="footer">Pressione ENTER para continuar ⌨️</div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div id="porcentagem">0%</div>
+
+  <div id="perguntaBox" class="pergunta-box"></div>
 </div>
 
-<!-- FINAL -->
 <div id="final" style="display:none">
-<div class="card">🎉 Parabéns por concluir o questionário!</div>
-<div class="card">📊 Suas respostas foram analisadas abaixo</div>
-<div class="card">📊 Veja abaixo um resumo das suas respostas</div>
-<h3>Resultado</h3>
-<canvas id="grafico"></canvas>
-<button onclick="reiniciar()">🔄 Reiniciar</button>
+  <canvas id="grafico"></canvas>
 </div>
-
-<div class="info-icons">🎮 📊 🎯 🧠 🚀</div>
 
 </div>
 </div>
 
 <script>
-let usuario="";
 
-function irLogin(){menu.style.display='none';login.style.display='block'}
-function voltarMenu(){sobre.style.display='none';menu.style.display='block'}
-function verSobre(){menu.style.display='none';sobre.style.display='block'}
+let perguntas=[
+{q:"O quão competitivo você se considera?",o:["Muito","Médio","Nada"]},
+{q:"Você se distrai facilmente?",o:["Muito","Às vezes","Não"]},
+{q:"Você gosta de desafios?",o:["Sim","Depende","Não"]},
+{q:"Você costuma cumprir tarefas?",o:["Sempre","Às vezes","Nunca"]},
+{q:"Você gosta de evoluir como em jogos?",o:["Sim","Talvez","Não"]},
+{q:"Você acompanha seu progresso?",o:["Sim","Mais ou menos","Não"]},
+{q:"Você gosta de rotina?",o:["Sim","Depende","Não"]},
+{q:"Você usa apps de organização?",o:["Sim","Às vezes","Não"]},
+{q:"Você prefere competir ou evoluir?",o:["Competir","Ambos","Evoluir"]},
+{q:"Você se considera disciplinado?",o:["Sim","Mais ou menos","Não"]}
+];
 
-function entrar(){
- usuario=nome.value;
- if(!usuario){alert('Digite nome');return}
- login.style.display='none';
- quiz.style.display='block';
- titulo.innerText="Olá, "+usuario;
+let atual=0;
+let respostas=[];
+
+function iniciar(){
+ document.getElementById("inicio").style.display="none";
+ document.getElementById("quiz").style.display="block";
  carregar();
 }
 
-window.addEventListener('keydown',function(e){
- if(e.key==='Enter'){
-  if(login.style.display==='block') entrar();
-  else if(quiz.style.display==='block') proxima();
- }
-});
-
-const perguntas=[
-{q:"Você tem dificuldade em manter rotina?",o:["Sim","Às vezes","Não"]},
-{q:"Você usa apps de produtividade?",o:["Sim","Às vezes","Nunca"]},
-{q:"Você gosta de jogos?",o:["Muito","Um pouco","Não"]},
-{q:"O que te motiva?",o:["Recompensa","Competição","Desafio"]},
-{q:"Gostaria de ganhar pontos?",o:["Sim","Talvez","Não"]},
-{q:"Subir nível motiva?",o:["Sim","Pouco","Não"]},
-{q:"Gosta de desafios?",o:["Sim","Às vezes","Não"]},
-{q:"Competir é interessante?",o:["Sim","Depende","Não"]},
-{q:"Ranking motiva?",o:["Sim","Talvez","Não"]},
-{q:"Conquistas interessam?",o:["Muito","Pouco","Nada"]},
-{q:"Quer melhorar produtividade?",o:["Sim","Já sou","Não"]},
-{q:"Usa celular todo dia?",o:["Muito","Normal","Pouco"]},
-{q:"Gostaria de app tipo jogo?",o:["Sim","Talvez","Não"]},
-{q:"Recompensas visuais ajudam?",o:["Sim","Pouco","Não"]},
-{q:"Usaria o app?",o:["Sim","Talvez","Não"]}
-];
-
-let atual=0,respostas=[];
-
 function carregar(){
- let progresso = Math.round((atual/perguntas.length)*100);
- document.getElementById("porcentagem").innerText = progresso + "% concluído";
+ let box=document.getElementById("perguntaBox");
 
- // mudança de cor dinâmica
- let cor;
- if(progresso < 30) cor = "#1e3a8a";
- else if(progresso < 70) cor = "#2563eb";
- else cor = "#22c55e";
- document.getElementById("bar").style.background = cor;
+ box.classList.remove("animar");
+ void box.offsetWidth;
+ box.classList.add("animar");
+
  let p=perguntas[atual];
- conteudo.classList.remove('fade');
- void conteudo.offsetWidth;
- conteudo.classList.add('fade');
- pergunta.innerText=`${atual+1}/15 - ${p.q}`;
- opcoes.innerHTML=p.o.map((op,i)=>`<div class='opcao' onclick='sel(${i})'>${op}</div>`).join('');
- bar.style.width=(atual/perguntas.length*100)+'%';
+
+ box.innerHTML=`<h3>${p.q}</h3>`;
+
+ p.o.forEach((op,i)=>{
+   let div=document.createElement("div");
+   div.className="opcao";
+   div.innerText=op;
+
+   div.onclick=()=>{
+     document.querySelectorAll(".opcao").forEach(e=>e.classList.remove("selecionado"));
+     div.classList.add("selecionado");
+     respostas[atual]=i;
+
+     setTimeout(()=>{
+       atual++;
+       if(atual<perguntas.length){
+         carregar();
+         atualizarBarra();
+       }else{
+         finalizar();
+       }
+     },300);
+   }
+
+   box.appendChild(div);
+ });
+
+ atualizarBarra();
 }
 
-function sel(i){
- respostas[atual]=i;
- document.querySelectorAll('.opcao').forEach(e=>e.classList.remove('selecionado'));
- document.querySelectorAll('.opcao')[i].classList.add('selecionado');
-}
-
-function proxima(){
- if(respostas[atual]==undefined){alert('Escolha!');return}
- atual++;
- atual<perguntas.length?carregar():finalizar();
+function atualizarBarra(){
+ let p=(atual/perguntas.length)*100;
+ document.getElementById("bar").style.width=p+"%";
+ document.getElementById("porcentagem").innerText=Math.round(p)+"%";
 }
 
 function finalizar(){
- quiz.style.display='none';
- final.style.display='block';
+ document.getElementById("quiz").style.display="none";
+ document.getElementById("final").style.display="block";
 
- // CONTAGEM
  let cont=[0,0,0];
  respostas.forEach(r=>cont[r]++);
 
- new Chart(grafico,{
-  type:'bar',
-  data:{
-    labels:['Sim','Intermediário','Não'],
-    datasets:[{
-      label:'Respostas',
-      data:cont,
-      backgroundColor:['#1e3a8a','#3b82f6','#22c55e'],
-      borderRadius:8
-    }]
-  },
-  options:{
-    plugins:{legend:{display:false}},
-    scales:{
-      y:{beginAtZero:true,ticks:{stepSize:1}}
-    }
-  }
-});
+ new Chart(document.getElementById("grafico"),{
+   type:"bar",
+   data:{
+     labels:["Alto","Médio","Baixo"],
+     datasets:[{
+       data:cont,
+       backgroundColor:["#1e3a8a","#3b82f6","#22c55e"]
+     }]
+   }
+ });
 
- // ✨ EFEITO GLOW (clean e moderno)
-let glow=document.createElement('div');
-glow.style.position='fixed';
-glow.style.top='0';
-glow.style.left='0';
-glow.style.width='100%';
-glow.style.height='100%';
-glow.style.background='radial-gradient(circle, rgba(34,197,94,0.25) 0%, rgba(0,0,0,0) 70%)';
-glow.style.opacity='0';
-glow.style.transition='opacity 1s ease';
-glow.style.zIndex='9998';
-document.body.appendChild(glow);
-setTimeout(()=>{glow.style.opacity='1';},50);
-setTimeout(()=>{glow.style.opacity='0';},1500);
-setTimeout(()=>{glow.remove();},2500);
+ let perfil="";
+ if(cont[0]>cont[1] && cont[0]>cont[2]){
+   perfil="🎯 Você tem perfil focado e competitivo.";
+ }else if(cont[1]>cont[2]){
+   perfil="⚖️ Você é equilibrado.";
+ }else{
+   perfil="🌱 Você está evoluindo seus hábitos.";
+ }
 
- // 🔥 PERFIL E MENSAGEM
- let perfilTitulo="";
-let perfilDesc="";
-
-if(cont[0] > cont[1] && cont[0] > cont[2]){
-  perfilTitulo="🎯 Você tem um perfil motivado";
-  perfilDesc="Você demonstra interesse em evoluir e busca formas de melhorar sua rotina. Um sistema gamificado pode te ajudar a manter consistência e alcançar seus objetivos.";
-} else if(cont[1] > cont[0] && cont[1] > cont[2]){
-  perfilTitulo="⚖️ Você tem um perfil equilibrado";
-  perfilDesc="Você já possui certa organização, mas ainda pode se beneficiar de estímulos como desafios e recompensas para manter a constância.";
-} else {
-  perfilTitulo="🌱 Você está em fase de construção";
-  perfilDesc="Você pode desenvolver hábitos com mais apoio e motivação. Um aplicativo gamificado pode tornar esse processo mais leve e interessante.";
+ let div=document.createElement("div");
+ div.innerText=perfil;
+ div.style.marginTop="10px";
+ document.getElementById("final").appendChild(div);
 }
 
-let box=document.createElement('div');
-box.style.marginTop='15px';
-box.style.padding='12px';
-box.style.borderRadius='10px';
-box.style.background='#eef2ff';
+document.addEventListener("mousemove",(e)=>{
+ let glow=document.getElementById("glow");
+ glow.style.left=e.clientX+"px";
+ glow.style.top=e.clientY+"px";
+});
 
-let titulo=document.createElement('div');
-titulo.innerText=perfilTitulo;
-titulo.style.fontWeight='bold';
-titulo.style.marginBottom='5px';
-
-let desc=document.createElement('div');
-desc.innerText=perfilDesc;
-desc.style.fontSize='13px';
-
-document.getElementById('final').appendChild(box);
-box.appendChild(titulo);
-box.appendChild(desc);
-};
-
-
-function reiniciar(){location.reload()}
 </script>
 
 </body>
